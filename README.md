@@ -2,6 +2,7 @@
 超核电子CH310S的串口ros package
 
 一、运行
+
 rosrun GIR_uart uart_node
 
 二、发布两个消息
