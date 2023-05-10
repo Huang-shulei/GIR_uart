@@ -143,6 +143,7 @@ void protocolSolution::readData()  //读取串口数据
       {
         displayTag("IMU");
         this->analyzePackageIMU();  //解析A包
+        IMUReceptionPub.publish(IMUReceptionMsg);
       }
     }
 
@@ -161,11 +162,9 @@ void protocolSolution::readData()  //读取串口数据
       {
         displayTag("RTK");
         this->analyzePackageRTK();  //解析A包
+        GNSS_RTKReceptionPub.publish(GNSS_RTKReceptionMsg);
       }
     }
-
-    IMUReceptionPub.publish(IMUReceptionMsg);
-    GNSS_RTKReceptionPub.publish(GNSS_RTKReceptionMsg);
     uartBuffer.pop_front();
   }
 }
