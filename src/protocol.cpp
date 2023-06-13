@@ -1,9 +1,14 @@
 #include "GIR_uart/protocol.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+
+using namespace std;
 
 #define CRC32_POLYNOMIAL 0xEDB88320L	
 float FREQ = 100.0;
 
-
+ofstream dataFile("GNSS_dataFile.txt");
 
 unsigned long protocolSolution::CRC32Value(int i) 
 {
@@ -111,11 +116,12 @@ void protocolSolution::readData()  //读取串口数据
   size_t receiverSize = uartSolver.available();//可读取数据的大小
   if (receiverSize != 0)
   {
-    uint8_t receiver[23000];
+    std::cout<<"read_data_ing"<<std::endl;
+    uint8_t receiver[500];
     receiverSize = uartSolver.read(receiver, receiverSize);
     for (int index = 0; index < receiverSize; index++)
     {
-      uartBuffer.push_back(receiver[index]);  //将数据加入缓冲队列
+        dataFile<<receiver[index]<<std::endl;
     }
   }
 
@@ -126,47 +132,50 @@ void protocolSolution::readData()  //读取串口数据
   }
 
   //--part3 缓冲区数据解析
-  if (uartBuffer.size() >= 230) // IMU包72字节(header28个字节、消息类型长度40个字节、最后四位为CRC校验码)+B包22位
-  {
+  // if (uartBuffer.size() >= 230) // IMU包72字节(header28个字节、消息类型长度40个字节、最后四位为CRC校验码)+B包22位
+  // {
     //解析IMU包
-    if (uartBuffer.at(0) == 0xAA && uartBuffer.at(1) == 0x44 &&
-        uartBuffer.at(2) == 0x12 && uartBuffer.at(3) == 0x1C &&
-        uartBuffer.at(8) == 0x28)  //判断帧头帧尾
-    { 
-      for(int i=0; i < 68; i++)
-      {
-        this->IMU_A_CRCbuffer[i] = uartBuffer.at(i);
-      }
-      unsigned long CRCle = this->CalculateBlockCRC32(sizeof(this->IMU_A_CRCbuffer), this->IMU_A_CRCbuffer);
-      if(CRCle == (unsigned long)(uartBuffer[71] << 24 | uartBuffer[70] << 16 | uartBuffer[69] << 8 | uartBuffer[68]) ||
-         CRCle == ((unsigned long)(uartBuffer[71] << 24 | uartBuffer[70] << 16 | uartBuffer[69] << 8 | uartBuffer[68])-(unsigned long)(18446744069414584320)))
-      {
-        displayTag("IMU");
-        this->analyzePackageIMU();  //解析A包
-        IMUReceptionPub.publish(IMUReceptionMsg);
-      }
-    }
+    // if (uartBuffer.at(0) == 0xAA && uartBuffer.at(1) == 0x44 &&
+    //     uartBuffer.at(2) == 0x12 && uartBuffer.at(3) == 0x1C &&
+    //     uartBuffer.at(8) == 0x28)  //判断帧头帧尾
+    // { 
+    //   for(int i=0; i < 68; i++)
+    //   {
+    //     this->IMU_A_CRCbuffer[i] = uartBuffer.at(i);
+    //   }
+    //   unsigned long CRCle = this->CalculateBlockCRC32(sizeof(this->IMU_A_CRCbuffer), this->IMU_A_CRCbuffer);
+    //   if(CRCle == (unsigned long)(uartBuffer[71] << 24 | uartBuffer[70] << 16 | uartBuffer[69] << 8 | uartBuffer[68]) ||
+    //      CRCle == ((unsigned long)(uartBuffer[71] << 24 | uartBuffer[70] << 16 | uartBuffer[69] << 8 | uartBuffer[68])-(unsigned long)(18446744069414584320)))
+    //   {
+    //     displayTag("IMU");
+    //     this->analyzePackageIMU();  //解析A包
+    //     IMUReceptionPub.publish(IMUReceptionMsg);
+    //   }
+    // }
 
     //解析RTK包
-    if (uartBuffer.at(0) == 0xAA && uartBuffer.at(1) == 0x44 &&
-        uartBuffer.at(2) == 0x12 && uartBuffer.at(3) == 0x1C &&
-        uartBuffer.at(8) == 0x7E)  //判断帧头帧尾
-    { 
-      for(int i=0; i < 154; i++)
-      {
-        this->IMU_B_CRCbuffer[i] = uartBuffer.at(i);
-      }
-      unsigned long CRCle = this->CalculateBlockCRC32(sizeof(this->IMU_B_CRCbuffer), this->IMU_B_CRCbuffer);
-      if(CRCle == (unsigned long)(uartBuffer[157] << 24 | uartBuffer[156] << 16 | uartBuffer[155] << 8 | uartBuffer[154]) ||
-         CRCle == ((unsigned long)(uartBuffer[157] << 24 | uartBuffer[156] << 16 | uartBuffer[155] << 8 | uartBuffer[154])-(unsigned long)(18446744069414584320)))
-      {
-        displayTag("RTK");
-        this->analyzePackageRTK();  //解析A包
-        GNSS_RTKReceptionPub.publish(GNSS_RTKReceptionMsg);
-      }
-    }
-    uartBuffer.pop_front();
-  }
+    // if (uartBuffer.at(0) == 0xAA && uartBuffer.at(1) == 0x44 &&
+    //     uartBuffer.at(2) == 0x12 && uartBuffer.at(3) == 0x1C &&
+    //     uartBuffer.at(8) == 0x7E)  //判断帧头帧尾
+    // { 
+    //   for(int i=0; i < 154; i++)
+    //   {
+    //     this->IMU_B_CRCbuffer[i] = uartBuffer.at(i);
+    //   }
+    //   unsigned long CRCle = this->CalculateBlockCRC32(sizeof(this->IMU_B_CRCbuffer), this->IMU_B_CRCbuffer);
+    //   if(CRCle == (unsigned long)(uartBuffer[157] << 24 | uartBuffer[156] << 16 | uartBuffer[155] << 8 | uartBuffer[154]) ||
+    //      CRCle == ((unsigned long)(uartBuffer[157] << 24 | uartBuffer[156] << 16 | uartBuffer[155] << 8 | uartBuffer[154])-(unsigned long)(18446744069414584320)))
+    //   {
+    //     displayTag("RTK");
+    //     this->analyzePackageRTK();  //解析A包
+    //     GNSS_RTKReceptionPub.publish(GNSS_RTKReceptionMsg);
+    //   }
+    // }
+
+    
+    
+  //   uartBuffer.pop_front();
+  // }
 }
 
 
