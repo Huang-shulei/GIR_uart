@@ -121,7 +121,9 @@ void protocolSolution::readData()  //读取串口数据
     receiverSize = uartSolver.read(receiver, receiverSize);
     for (int index = 0; index < receiverSize; index++)
     {
-        dataFile<<receiver[index]<<std::endl;
+        // dataFile<<receiver[index]<<std::endl;
+        // std::cout<<receiver[index]<<std::endl;
+        uartBuffer.push_back(receiver[index]);
     }
   }
 
@@ -129,6 +131,36 @@ void protocolSolution::readData()  //读取串口数据
   if (uartBuffer.size() > 999)  //如果数据量大于999
   {
     uartBuffer.clear();  //则清空
+  }
+
+  if(uartBuffer.size() > 0)
+  {
+      if(uartBuffer.at(0) == 0x24)
+      {
+        for(int index = 0; index < uartBuffer.size(); index++)
+        {
+          if(uartBuffer.at(index) != 0x0A)
+          {
+            uartBuffer_1.push_back(uartBuffer.at(index));
+          }
+          else
+          {
+            uartBuffer.clear();
+            for(int index = 0; index < uartBuffer_1.size(); index++)
+            {
+              // std::cout<<uartBuffer_1.at(index)<<std::endl;
+              dataFile<<uartBuffer_1.at(index);
+            }
+            std::cout<<uartBuffer_1.size()<<std::endl;
+            break;
+          }
+        }
+        uartBuffer_1.clear();       
+      }
+      // uartBuffer.pop_front();
+      
+      
+      // std::cout<<uartBuffer_1.size()<<std::endl;
   }
 
   //--part3 缓冲区数据解析

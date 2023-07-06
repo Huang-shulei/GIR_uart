@@ -36,6 +36,7 @@ private:
   void displayTag(std::string str);
   //--串口缓冲区
   deque<uint8_t> uartBuffer;
+  deque<uint8_t> uartBuffer_1;
   //--串口配置器
   serial::Serial uartSolver;
   //jason参数

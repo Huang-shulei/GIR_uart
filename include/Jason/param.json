@@ -1,7 +1,7 @@
 {
     "uartParam":
     {
-        "passWord":"hsl0428",
+        "passWord":"tiger@neu",
         "usbPath":"/dev/ttyUSB0",
         "isDisplay":1
     }
