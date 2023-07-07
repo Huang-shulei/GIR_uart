@@ -2,7 +2,7 @@
     "uartParam":
     {
         "passWord":"tiger@neu",
-        "usbPath":"/dev/ttyUSB0",
+        "usbPath":"/dev/serial-GNSS",
         "isDisplay":1
     }
 }
